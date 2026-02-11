@@ -1,3 +1,9 @@
 *.xcframework/
 .DS_Store
 xcuserdata/
+
+# FastVLM model files (large binaries, download separately)
+CameraAccess/FastVLM/models/
+
+# Xcode workspace metadata
+*.xcworkspace/
