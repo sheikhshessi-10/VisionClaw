@@ -15,11 +15,19 @@ workflows:
           sed -i '' "s/YOUR_GEMINI_API_KEY/$GEMINI_API_KEY/g" samples/CameraAccess/CameraAccess/Secrets.swift
       - name: Build App
         script: |
-          xcodebuild build -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO
-      - name: Create IPA
+          # This builds the app into a specific folder we can find
+          xcodebuild build \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath ./build \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Package IPA
         script: |
+          # This pulls the file from the new 'build' folder we just created
           mkdir -p Payload
-          cp -r $(find . -name "*.app" | head -1) Payload/
+          cp -r ./build/Build/Products/Release-iphoneos/*.app Payload/
           zip -r VisionClaw.ipa Payload
     artifacts:
       - "*.ipa"
