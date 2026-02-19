@@ -1,30 +1,25 @@
 workflows:
   ios-vision-build:
     name: VisionClaw iPhone Build
-    max_build_duration: 30
-    instance_type: mac_mini_m1
+    instance_type: mac_mini_m2
     environment:
       groups:
-        - default  # This is where your GEMINI_API_KEY lives
+        - default
       vars:
         XCODE_PROJECT: "samples/CameraAccess/CameraAccess.xcodeproj"
         XCODE_SCHEME: "CameraAccess"
     scripts:
       - name: Setup Secrets
-        script: | 
-          # This creates the missing file the app needs to compile
+        script: |
           cp samples/CameraAccess/CameraAccess/Secrets.swift.example samples/CameraAccess/CameraAccess/Secrets.swift
-          # This injects your API key into the code
           sed -i '' "s/YOUR_GEMINI_API_KEY/$GEMINI_API_KEY/g" samples/CameraAccess/CameraAccess/Secrets.swift
-      - name: Build Native iOS App
-        script: | 
-          xcodebuild build \
-            -project "$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Release \
-            -sdk iphoneos \
-            CODE_SIGNING_ALLOWED=NO
+      - name: Build App
+        script: |
+          xcodebuild build -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -configuration Release -sdk iphoneos CODE_SIGNING_ALLOWED=NO
+      - name: Create IPA
+        script: |
+          mkdir -p Payload
+          cp -r $(find . -name "*.app" | head -1) Payload/
+          zip -r VisionClaw.ipa Payload
     artifacts:
-  - "**/build/ios/iphoneos/*.app"
-  - "**/build/ios/iphoneos/*.ipa"
-  - "*.ipa"
+      - "*.ipa"
