@@ -25,4 +25,6 @@ workflows:
             -sdk iphoneos \
             CODE_SIGNING_ALLOWED=NO
     artifacts:
-      - build/ios/iphoneos/*.app
+  - "**/build/ios/iphoneos/*.app"
+  - "**/build/ios/iphoneos/*.ipa"
+  - "*.ipa"
