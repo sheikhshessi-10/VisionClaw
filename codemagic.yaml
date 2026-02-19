@@ -1,0 +1,28 @@
+workflows:
+  ios-vision-build:
+    name: VisionClaw iPhone Build
+    max_build_duration: 30
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - default  # This is where your GEMINI_API_KEY lives
+      vars:
+        XCODE_PROJECT: "samples/CameraAccess/CameraAccess.xcodeproj"
+        XCODE_SCHEME: "CameraAccess"
+    scripts:
+      - name: Setup Secrets
+        script: | 
+          # This creates the missing file the app needs to compile
+          cp samples/CameraAccess/CameraAccess/Secrets.swift.example samples/CameraAccess/CameraAccess/Secrets.swift
+          # This injects your API key into the code
+          sed -i '' "s/YOUR_GEMINI_API_KEY/$GEMINI_API_KEY/g" samples/CameraAccess/CameraAccess/Secrets.swift
+      - name: Build Native iOS App
+        script: | 
+          xcodebuild build \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO
+    artifacts:
+      - build/ios/iphoneos/*.app
